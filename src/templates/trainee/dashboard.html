@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}لوحة تحكم المتدرب - تتبع تمارين الشارع{% else %}Trainee Dashboard - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}لوحة تحكم المتدرب{% else %}Trainee Dashboard{% endif %}</h1>
+                <p class="subtitle">{% if lang == 'ar' %}مرحباً، {{ current_user.name }}{% else %}Welcome, {{ current_user.name }}{% endif %}</p>
+            </div>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle">
+                        <i class="fas fa-user"></i> {{ current_user.name }}
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="{{ url_for('auth.profile') }}">{% if lang == 'ar' %}الملف الشخصي{% else %}Profile{% endif %}</a>
+                        <a href="{{ url_for('auth.logout') }}">{% if lang == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}</a>
+                    </div>
+                </div>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if notifications %}
+        <div class="card notification-card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}الإشعارات{% else %}Notifications{% endif %}</h2>
+                <div class="card-actions">
+                    <form action="{{ url_for('trainee.mark_all_notifications_read') }}" method="POST">
+                        <button type="submit" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-check-double"></i> {% if lang == 'ar' %}تعليم الكل كمقروء{% else %}Mark All as Read{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="notification-list">
+                    {% for notification in notifications %}
+                    <div class="notification-item">
+                        <div class="notification-content">
+                            <p>{{ notification.message }}</p>
+                            <small>{{ notification.created_at }}</small>
+                        </div>
+                        <div class="notification-actions">
+                            <form action="{{ url_for('trainee.mark_notification_read', notification_id=notification.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{% if lang == 'ar' %}إضافة تمرين جديد{% else %}Add New Workout{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('trainee.add_workout') }}" method="POST" id="addWorkoutForm">
+                        <div class="form-group">
+                            <label for="date">{% if lang == 'ar' %}التاريخ{% else %}Date{% endif %}:</label>
+                            <input type="date" id="date" name="date" value="{{ today_date }}" required>
+                        </div>
+                        
+                        {% for ex, unit in exercises.items() %}
+                        <div class="form-group exercise-group">
+                            <label for="{{ ex }}">{{ ex }} ({{ unit }}):</label>
+                            <div class="exercise-inputs">
+                                <input type="number" id="{{ ex }}" name="{{ ex }}" min="0" placeholder="{% if lang == 'ar' %}أدخل القيمة{% else %}Enter value{% endif %}">
+                                
+                                <div class="exercise-details">
+                                    <div class="weight-input">
+                                        <label for="{{ ex }}_weight">{% if lang == 'ar' %}الوزن (كجم){% else %}Weight (kg){% endif %}:</label>
+                                        <input type="number" id="{{ ex }}_weight" name="{{ ex }}_weight" min="0" step="0.5" placeholder="0">
+                                    </div>
+                                    
+                                    <div class="resistance-input">
+                                        <label for="{{ ex }}_resistance">{% if lang == 'ar' %}المقاومة{% else %}Resistance{% endif %}:</label>
+                                        <select id="{{ ex }}_resistance" name="{{ ex }}_resistance">
+                                            <option value="">{% if lang == 'ar' %}بدون{% else %}None{% endif %}</option>
+                                            <option value="light">{% if lang == 'ar' %}خفيفة{% else %}Light{% endif %}</option>
+                                            <option value="medium">{% if lang == 'ar' %}متوسطة{% else %}Medium{% endif %}</option>
+                                            <option value="heavy">{% if lang == 'ar' %}ثقيلة{% else %}Heavy{% endif %}</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="notes-input">
+                                        <label for="{{ ex }}_notes">{% if lang == 'ar' %}ملاحظات{% else %}Notes{% endif %}:</label>
+                                        <input type="text" id="{{ ex }}_notes" name="{{ ex }}_notes" placeholder="{% if lang == 'ar' %}ملاحظات إضافية{% else %}Additional notes{% endif %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> {% if lang == 'ar' %}إضافة{% else %}Add{% endif %}
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> {% if lang == 'ar' %}إعادة تعيين{% else %}Reset{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>{% if lang == 'ar' %}إضافة نوع تمرين جديد{% else %}Add New Exercise Type{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('trainee.add_exercise') }}" method="POST">
+                        <div class="form-group">
+                            <label for="exercise_name">{% if lang == 'ar' %}اسم التمرين{% else %}Exercise Name{% endif %}:</label>
+                            <input type="text" id="exercise_name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="exercise_unit">{% if lang == 'ar' %}وحدة القياس{% else %}Measurement Unit{% endif %}:</label>
+                            <select id="exercise_unit" name="unit">
+                                <option value="عدد">{% if lang == 'ar' %}عدد{% else %}Count{% endif %}</option>
+                                <option value="ثواني">{% if lang == 'ar' %}ثواني{% else %}Seconds{% endif %}</option>
+                                <option value="دقائق">{% if lang == 'ar' %}دقائق{% else %}Minutes{% endif %}</option>
+                                <option value="كيلوغرام">{% if lang == 'ar' %}كيلوغرام{% else %}Kilograms{% endif %}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="exercise_category">{% if lang == 'ar' %}الفئة{% else %}Category{% endif %}:</label>
+                            <select id="exercise_category" name="category">
+                                <option value="عام">{% if lang == 'ar' %}عام{% else %}General{% endif %}</option>
+                                <option value="قوة">{% if lang == 'ar' %}قوة{% else %}Strength{% endif %}</option>
+                                <option value="تحمل">{% if lang == 'ar' %}تحمل{% else %}Endurance{% endif %}</option>
+                                <option value="مرونة">{% if lang == 'ar' %}مرونة{% else %}Flexibility{% endif %}</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> {% if lang == 'ar' %}إضافة تمرين{% else %}Add Exercise{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card chart-card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تطور الأداء{% else %}Performance Progress{% endif %}</h2>
+                <div class="card-actions">
+                    <div class="chart-controls">
+                        <div class="chart-type-selector">
+                            <label for="chart-type">{% if lang == 'ar' %}نوع الرسم البياني{% else %}Chart Type{% endif %}:</label>
+                            <select id="chart-type" onchange="updateChartType()">
+                                <option value="line">{% if lang == 'ar' %}خطي{% else %}Line{% endif %}</option>
+                                <option value="radar">{% if lang == 'ar' %}راداري{% else %}Radar{% endif %}</option>
+                                <option value="heatmap">{% if lang == 'ar' %}خريطة حرارية{% else %}Heatmap{% endif %}</option>
+                                <option value="weekly">{% if lang == 'ar' %}ملخص أسبوعي{% else %}Weekly Summary{% endif %}</option>
+                            </select>
+                        </div>
+                        <div class="time-range-selector">
+                            <label for="time-range">{% if lang == 'ar' %}الفترة الزمنية{% else %}Time Range{% endif %}:</label>
+                            <select id="time-range" onchange="updateTimeRange()">
+                                <option value="all">{% if lang == 'ar' %}الكل{% else %}All{% endif %}</option>
+                                <option value="month">{% if lang == 'ar' %}آخر شهر{% else %}Last Month{% endif %}</option>
+                                <option value="3months">{% if lang == 'ar' %}آخر 3 أشهر{% else %}Last 3 Months{% endif %}</option>
+                                <option value="6months">{% if lang == 'ar' %}آخر 6 أشهر{% else %}Last 6 Months{% endif %}</option>
+                                <option value="year">{% if lang == 'ar' %}آخر سنة{% else %}Last Year{% endif %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="export-actions">
+                        <a href="{{ url_for('trainee.export_excel') }}" class="btn btn-secondary">
+                            <i class="fas fa-file-excel"></i> {% if lang == 'ar' %}تصدير Excel{% else %}Export Excel{% endif %}
+                        </a>
+                        <a href="{{ url_for('trainee.export_pdf') }}" class="btn btn-secondary">
+                            <i class="fas fa-file-pdf"></i> {% if lang == 'ar' %}تصدير PDF{% else %}Export PDF{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="progress-chart" class="progress-chart"></div>
+            </div>
+        </div>
+
+        {% if workouts %}
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}سجل التمارين{% else %}Workout History{% endif %}</h2>
+                <div class="card-actions">
+                    <div class="search-box">
+                        <input type="text" id="workout-search" placeholder="{% if lang == 'ar' %}بحث...{% else %}Search...{% endif %}" onkeyup="searchWorkouts()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="workout-table" id="workout-table">
+                        <thead>
+                            <tr>
+                                <th>{% if lang == 'ar' %}التاريخ{% else %}Date{% endif %}</th>
+                                {% for ex in exercises %}
+                                <th>{{ ex }}</th>
+                                {% endfor %}
+                                <th>{% if lang == 'ar' %}الإجراءات{% else %}Actions{% endif %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workout in workouts %}
+                            <tr>
+                                <td>{{ workout.date }}</td>
+                                {% for ex in exercises %}
+                                <td>
+                                    {% if workout[ex] is defined and workout[ex] is not none %}
+                                        {{ workout[ex]|int }}
+                                        {% if workout[ex ~ '_weight'] is defined and workout[ex ~ '_weight'] > 0 %}
+                                            <span class="weight-badge">{{ workout[ex ~ '_weight'] }} {% if lang == 'ar' %}كجم{% else %}kg{% endif %}</span>
+                                        {% endif %}
+                                        {% if workout[ex ~ '_resistance'] is defined and workout[ex ~ '_resistance'] %}
+                                            <span class="resistance-badge {{ workout[ex ~ '_resistance'] }}">
+                                                {% if workout[ex ~ '_resistance'] == 'light' %}
+                                                    {% if lang == 'ar' %}خفيفة{% else %}Light{% endif %}
+                                                {% elif workout[ex ~ '_resistance'] == 'medium' %}
+                                                    {% if lang == 'ar' %}متوسطة{% else %}Medium{% endif %}
+                                                {% elif workout[ex ~ '_resistance'] == 'heavy' %}
+                                                    {% if lang == 'ar' %}ثقيلة{% else %}Heavy{% endif %}
+                                                {% endif %}
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                                <td class="actions">
+                                    <button class="btn btn-sm btn-edit" onclick="editWorkout({{ loop.index0 }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form action="{{ url_for('trainee.delete_workout', workout_id=workout.id) }}" method="POST" class="inline-form">
+                                        <button type="submit" class="btn btn-sm btn-delete" onclick="return confirm('{% if lang == 'ar' %}هل أنت متأكد من حذف هذا التمرين؟{% else %}Are you sure you want to delete this workout?{% endif %}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('trainee.share_workout', workout_id=workout.id) }}" class="btn btn-sm btn-share">
+                                        <i class="fas fa-share-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if coaches %}
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}المدربين{% else %}Coaches{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="coaches-list">
+                    {% for coach in coaches %}
+                    <div class="coach-card">
+                        <div class="coach-info">
+                            <h3>{{ coach.name }}</h3>
+                            <p>{{ coach.email }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- نافذة تعديل التمرين -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>{% if lang == 'ar' %}تعديل التمرين{% else %}Edit Workout{% endif %}</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm" method="POST">
+                    <div class="form-group">
+                        <label for="edit_date">{% if lang == 'ar' %}التاريخ{% else %}Date{% endif %}:</label>
+                        <input type="date" id="edit_date" name="date" required>
+                    </div>
+                    
+                    {% for ex, unit in exercises.items() %}
+                    <div class="form-group exercise-group">
+                        <label for="edit_{{ ex }}">{{ ex }} ({{ unit }}):</label>
+                        <div class="exercise-inputs">
+                            <input type="number" id="edit_{{ ex }}" name="{{ ex }}" min="0">
+                            
+                            <div class="exercise-details">
+                                <div class="weight-input">
+                                    <label for="edit_{{ ex }}_weight">{% if lang == 'ar' %}الوزن (كجم){% else %}Weight (kg){% endif %}:</label>
+                                    <input type="number" id="edit_{{ ex }}_weight" name="{{ ex }}_weight" min="0" step="0.5">
+                                </div>
+                                
+                                <div class="resistance-input">
+                                    <label for="edit_{{ ex }}_resistance">{% if lang == 'ar' %}المقاومة{% else %}Resistance{% endif %}:</label>
+                                    <select id="edit_{{ ex }}_resistance" name="{{ ex }}_resistance">
+                                        <option value="">{% if lang == 'ar' %}بدون{% else %}None{% endif %}</option>
+                                        <option value="light">{% if lang == 'ar' %}خفيفة{% else %}Light{% endif %}</option>
+                                        <option value="medium">{% if lang == 'ar' %}متوسطة{% else %}Medium{% endif %}</option>
+                                        <option value="heavy">{% if lang == 'ar' %}ثقيلة{% else %}Heavy{% endif %}</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="notes-input">
+                                    <label for="edit_{{ ex }}_notes">{% if lang == 'ar' %}ملاحظات{% else %}Notes{% endif %}:</label>
+                                    <input type="text" id="edit_{{ ex }}_notes" name="{{ ex }}_notes">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if lang == 'ar' %}حفظ التغييرات{% else %}Save Changes{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }} | {% if lang == 'ar' %}الإصدار{% else %}Version{% endif %}: {{ app_version }}</p>
+    </footer>
+
+    <script>
+        // تهيئة الرسم البياني
+        var chartData = {{ chart_data|safe }};
+        var chartObj = JSON.parse(chartData);
+        Plotly.newPlot('progress-chart', chartObj.data, chartObj.layout);
+        
+        // الحصول على النافذة المنبثقة
+        var modal = document.getElementById("editModal");
+        var span = document.getElementsByClassName("close")[0];
+        
+        // تاريخ التمارين
+        var workouts = {{ workouts|tojson }};
+        
+        // دالة لفتح نافذة التعديل
+        function editWorkout(index) {
+            // تعيين عنوان النموذج
+            document.getElementById("editForm").action = "{{ url_for('trainee.update_workout', workout_id=0) }}".replace('0', workouts[index].id);
+            
+            // تعبئة البيانات
+            document.getElementById("edit_date").value = workouts[index].date;
+            
+            {% for ex in exercises %}
+            var value = workouts[index]["{{ ex }}"];
+            document.getElementById("edit_{{ ex }}").value = value !== null && value !== undefined ? value : "";
+            
+            var weight = workouts[index]["{{ ex }}_weight"];
+            document.getElementById("edit_{{ ex }}_weight").value = weight !== null && weight !== undefined ? weight : "";
+            
+            var resistance = workouts[index]["{{ ex }}_resistance"];
+            document.getElementById("edit_{{ ex }}_resistance").value = resistance !== null && resistance !== undefined ? resistance : "";
+            
+            var notes = workouts[index]["{{ ex }}_notes"];
+            document.getElementById("edit_{{ ex }}_notes").value = notes !== null && notes !== undefined ? notes : "";
+            {% endfor %}
+            
+            // عرض النافذة المنبثقة
+            modal.style.display = "block";
+        }
+        
+        // إغلاق النافذة المنبثقة عند النقر على X
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // إغلاق النافذة المنبثقة عند النقر خارجها
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // تحديث نوع الرسم البياني
+        function updateChartType() {
+            var chartType = document.getElementById("chart-type").value;
+            var timeRange = document.getElementById("time-range").value;
+            
+            fetch(`{{ url_for('trainee.update_chart') }}?type=${chartType}&range=${timeRange}`)
+                .then(response => response.json())
+                .then(data => {
+                    var chartObj = JSON.parse(data.chart_data);
+                    Plotly.react('progress-chart', chartObj.data, chartObj.layout);
+                });
+        }
+        
+        // تحديث الفترة الزمنية
+        function updateTimeRange() {
+            var chartType = document.getElementById("chart-type").value;
+            var timeRange = document.getElementById("time-range").value;
+            
+            fetch(`{{ url_for('trainee.update_chart') }}?type=${chartType}&range=${timeRange}`)
+                .then(response => response.json())
+                .then(data => {
+                    var chartObj = JSON.parse(data.chart_data);
+                    Plotly.react('progress-chart', chartObj.data, chartObj.layout);
+                });
+        }
+        
+        // البحث في سجل التمارين
+        function searchWorkouts() {
+            var input, filter, table, tr, td, i, j, txtValue, found;
+            input = document.getElementById("workout-search");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("workout-table");
+            tr = table.getElementsByTagName("tr");
+            
+            for (i = 1; i < tr.length; i++) {
+                found = false;
+                td = tr[i].getElementsByTagName("td");
+                
+                for (j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (found) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

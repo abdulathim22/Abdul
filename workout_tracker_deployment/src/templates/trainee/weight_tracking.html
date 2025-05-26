@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}تتبع الأوزان والمقاومة - تتبع تمارين الشارع{% else %}Weight & Resistance Tracking - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}تتبع الأوزان والمقاومة{% else %}Weight & Resistance Tracking{% endif %}</h1>
+                <p class="subtitle">{% if lang == 'ar' %}مرحباً، {{ current_user.name }}{% else %}Welcome, {{ current_user.name }}{% endif %}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('trainee.dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% if lang == 'ar' %}العودة للوحة التحكم{% else %}Back to Dashboard{% endif %}
+                </a>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}نظرة عامة{% else %}Overview{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <p>{% if lang == 'ar' %}تتبع تقدمك في الأوزان والمقاومة لكل تمرين. يمكنك رؤية كيف تطورت قوتك وقدرتك على التحمل مع مرور الوقت.{% else %}Track your progress in weights and resistance for each exercise. See how your strength and endurance have evolved over time.{% endif %}</p>
+                
+                <div class="exercise-selector">
+                    <label for="exercise-select">{% if lang == 'ar' %}اختر التمرين{% else %}Select Exercise{% endif %}:</label>
+                    <select id="exercise-select" onchange="updateTrackingCharts()">
+                        {% for ex in exercises %}
+                        <option value="{{ ex }}">{{ ex }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card chart-card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تتبع الأوزان{% else %}Weight Tracking{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div id="weight-chart" class="tracking-chart"></div>
+                <div class="chart-info">
+                    <p>{% if lang == 'ar' %}يوضح هذا الرسم البياني تقدمك في الأوزان المستخدمة مع مرور الوقت. الخط الأزرق يمثل قيمة التمرين، والخط الأحمر يمثل الوزن المستخدم.{% else %}This chart shows your progress in weights used over time. The blue line represents the exercise value, and the red line represents the weight used.{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card chart-card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تتبع المقاومة{% else %}Resistance Tracking{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div id="resistance-chart" class="tracking-chart"></div>
+                <div class="chart-info">
+                    <p>{% if lang == 'ar' %}يوضح هذا الرسم البياني تقدمك في مستويات المقاومة المستخدمة مع مرور الوقت. الخط الأزرق يمثل قيمة التمرين، والخط الأخضر يمثل مستوى المقاومة.{% else %}This chart shows your progress in resistance levels used over time. The blue line represents the exercise value, and the green line represents the resistance level.{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}نصائح للتقدم{% else %}Progress Tips{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}زيادة الوزن تدريجياً{% else %}Increase Weight Gradually{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}زيادة الوزن بنسبة 5-10% كل أسبوعين أو ثلاثة أسابيع يساعد على بناء القوة بشكل آمن.{% else %}Increasing weight by 5-10% every two to three weeks helps build strength safely.{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}تنويع المقاومة{% else %}Vary Resistance{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}تبديل مستويات المقاومة بين خفيفة ومتوسطة وثقيلة يساعد على تحفيز العضلات بطرق مختلفة.{% else %}Alternating between light, medium, and heavy resistance helps stimulate muscles in different ways.{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}الراحة مهمة{% else %}Rest is Important{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}تأكد من أخذ يوم أو يومين للراحة بين تمارين نفس المجموعة العضلية للسماح بالتعافي والنمو.{% else %}Make sure to take a day or two of rest between workouts for the same muscle group to allow for recovery and growth.{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }} | {% if lang == 'ar' %}الإصدار{% else %}Version{% endif %}: {{ app_version }}</p>
+    </footer>
+
+    <script>
+        // بيانات تتبع الأوزان
+        var weightData = {{ weight_data|tojson }};
+        
+        // بيانات تتبع المقاومة
+        var resistanceData = {{ resistance_data|tojson }};
+        
+        // تحديث الرسوم البيانية
+        function updateTrackingCharts() {
+            var exercise = document.getElementById('exercise-select').value;
+            
+            // تحديث رسم تتبع الأوزان
+            updateWeightChart(exercise);
+            
+            // تحديث رسم تتبع المقاومة
+            updateResistanceChart(exercise);
+        }
+        
+        // تحديث رسم تتبع الأوزان
+        function updateWeightChart(exercise) {
+            var data = weightData[exercise] || [];
+            
+            if (data.length === 0) {
+                // إنشاء رسم بياني فارغ
+                var emptyFig = {
+                    data: [],
+                    layout: {
+                        title: "{{ 'لا توجد بيانات كافية لتتبع الأوزان' if lang == 'ar' else 'No data available for weight tracking' }}",
+                        template: "plotly_white"
+                    }
+                };
+                
+                Plotly.newPlot('weight-chart', emptyFig.data, emptyFig.layout);
+                return;
+            }
+            
+            var dates = data.map(item => item.date);
+            var values = data.map(item => item[exercise]);
+            var weights = data.map(item => item[exercise + '_weight']);
+            
+            var fig = {
+                data: [
+                    {
+                        x: dates,
+                        y: values,
+                        mode: 'lines+markers',
+                        name: "{{ 'القيمة' if lang == 'ar' else 'Value' }}",
+                        line: {color: 'blue'}
+                    },
+                    {
+                        x: dates,
+                        y: weights,
+                        mode: 'lines+markers',
+                        name: "{{ 'الوزن (كجم)' if lang == 'ar' else 'Weight (kg)' }}",
+                        line: {color: 'red'},
+                        yaxis: 'y2'
+                    }
+                ],
+                layout: {
+                    title: exercise + " - {{ 'تتبع الأوزان' if lang == 'ar' else 'Weight Tracking' }}",
+                    xaxis: {
+                        title: "{{ 'التاريخ' if lang == 'ar' else 'Date' }}"
+                    },
+                    yaxis: {
+                        title: "{{ 'القيمة' if lang == 'ar' else 'Value' }}",
+                        titlefont: {color: 'blue'},
+                        tickfont: {color: 'blue'}
+                    },
+                    yaxis2: {
+                        title: "{{ 'الوزن (كجم)' if lang == 'ar' else 'Weight (kg)' }}",
+                        titlefont: {color: 'red'},
+                        tickfont: {color: 'red'},
+                        anchor: "x",
+                        overlaying: "y",
+                        side: "right"
+                    },
+                    hovermode: "closest",
+                    legend: {
+                        orientation: "h",
+                        yanchor: "bottom",
+                        y: 1.02,
+                        xanchor: "right",
+                        x: 1
+                    },
+                    template: "plotly_white"
+                }
+            };
+            
+            Plotly.newPlot('weight-chart', fig.data, fig.layout);
+        }
+        
+        // تحديث رسم تتبع المقاومة
+        function updateResistanceChart(exercise) {
+            var data = resistanceData[exercise] || [];
+            
+            if (data.length === 0) {
+                // إنشاء رسم بياني فارغ
+                var emptyFig = {
+                    data: [],
+                    layout: {
+                        title: "{{ 'لا توجد بيانات كافية لتتبع المقاومة' if lang == 'ar' else 'No data available for resistance tracking' }}",
+                        template: "plotly_white"
+                    }
+                };
+                
+                Plotly.newPlot('resistance-chart', emptyFig.data, emptyFig.layout);
+                return;
+            }
+            
+            // تحويل مستويات المقاومة إلى قيم عددية
+            var resistanceValues = {
+                'light': 1,
+                'medium': 2,
+                'heavy': 3
+            };
+            
+            var dates = data.map(item => item.date);
+            var values = data.map(item => item[exercise]);
+            var resistance = data.map(item => resistanceValues[item[exercise + '_resistance']] || 0);
+            
+            var fig = {
+                data: [
+                    {
+                        x: dates,
+                        y: values,
+                        mode: 'lines+markers',
+                        name: "{{ 'القيمة' if lang == 'ar' else 'Value' }}",
+                        line: {color: 'blue'}
+                    },
+                    {
+                        x: dates,
+                        y: resistance,
+                        mode: 'lines+markers',
+                        name: "{{ 'مستوى المقاومة' if lang == 'ar' else 'Resistance Level' }}",
+                        line: {color: 'green'},
+                        yaxis: 'y2'
+                    }
+                ],
+                layout: {
+                    title: exercise + " - {{ 'تتبع المقاومة' if lang == 'ar' else 'Resistance Tracking' }}",
+                    xaxis: {
+                        title: "{{ 'التاريخ' if lang == 'ar' else 'Date' }}"
+                    },
+                    yaxis: {
+                        title: "{{ 'القيمة' if lang == 'ar' else 'Value' }}",
+                        titlefont: {color: 'blue'},
+                        tickfont: {color: 'blue'}
+                    },
+                    yaxis2: {
+                        title: "{{ 'مستوى المقاومة' if lang == 'ar' else 'Resistance Level' }}",
+                        titlefont: {color: 'green'},
+                        tickfont: {color: 'green'},
+                        anchor: "x",
+                        overlaying: "y",
+                        side: "right",
+                        range: [0, 4],
+                        tickvals: [1, 2, 3],
+                        ticktext: ["{{ 'خفيفة' if lang == 'ar' else 'Light' }}", "{{ 'متوسطة' if lang == 'ar' else 'Medium' }}", "{{ 'ثقيلة' if lang == 'ar' else 'Heavy' }}"]
+                    },
+                    hovermode: "closest",
+                    legend: {
+                        orientation: "h",
+                        yanchor: "bottom",
+                        y: 1.02,
+                        xanchor: "right",
+                        x: 1
+                    },
+                    template: "plotly_white"
+                }
+            };
+            
+            Plotly.newPlot('resistance-chart', fig.data, fig.layout);
+        }
+        
+        // تهيئة الرسوم البيانية عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTrackingCharts();
+        });
+    </script>
+</body>
+</html>

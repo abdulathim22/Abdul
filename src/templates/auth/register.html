@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}إنشاء حساب - تتبع تمارين الشارع{% else %}Register - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>{% if lang == 'ar' %}إنشاء حساب{% else %}Register{% endif %}</h1>
+                    <p class="subtitle">{% if lang == 'ar' %}أنشئ حسابك الجديد للبدء في تتبع تمارينك{% else %}Create your new account to start tracking your workouts{% endif %}</p>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="auth-body">
+                    <form action="{{ url_for('auth.register') }}" method="POST">
+                        <div class="form-group">
+                            <label for="name">{% if lang == 'ar' %}الاسم{% else %}Name{% endif %}</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">{% if lang == 'ar' %}البريد الإلكتروني{% else %}Email{% endif %}</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">{% if lang == 'ar' %}كلمة المرور{% else %}Password{% endif %}</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password">{% if lang == 'ar' %}تأكيد كلمة المرور{% else %}Confirm Password{% endif %}</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="user_type">{% if lang == 'ar' %}نوع الحساب{% else %}Account Type{% endif %}</label>
+                            <select id="user_type" name="user_type" required>
+                                <option value="trainee">{% if lang == 'ar' %}متدرب{% else %}Trainee{% endif %}</option>
+                                <option value="coach">{% if lang == 'ar' %}مدرب{% else %}Coach{% endif %}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-user-plus"></i> {% if lang == 'ar' %}إنشاء حساب{% else %}Register{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="auth-links">
+                        <p>{% if lang == 'ar' %}لديك حساب بالفعل؟{% else %}Already have an account?{% endif %} <a href="{{ url_for('auth.login') }}">{% if lang == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}</a></p>
+                    </div>
+                </div>
+                
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }}</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}لوحة تحكم المدرب - تتبع تمارين الشارع{% else %}Coach Dashboard - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}لوحة تحكم المدرب{% else %}Coach Dashboard{% endif %}</h1>
+                <p class="subtitle">{% if lang == 'ar' %}مرحباً، {{ current_user.name }}{% else %}Welcome, {{ current_user.name }}{% endif %}</p>
+            </div>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle">
+                        <i class="fas fa-user"></i> {{ current_user.name }}
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="{{ url_for('auth.profile') }}">{% if lang == 'ar' %}الملف الشخصي{% else %}Profile{% endif %}</a>
+                        <a href="{{ url_for('auth.logout') }}">{% if lang == 'ar' %}تسجيل الخروج{% else %}Logout{% endif %}</a>
+                    </div>
+                </div>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{% if lang == 'ar' %}إجمالي المتدربين{% else %}Total Trainees{% endif %}</h3>
+                    <p class="stat-value">{{ stats.total_trainees }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{% if lang == 'ar' %}المتدربين النشطين{% else %}Active Trainees{% endif %}</h3>
+                    <p class="stat-value">{{ stats.active_trainees }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{% if lang == 'ar' %}إجمالي التمارين{% else %}Total Workouts{% endif %}</h3>
+                    <p class="stat-value">{{ stats.total_workouts }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{% if lang == 'ar' %}المتدربين{% else %}Trainees{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    {% if trainees %}
+                    <div class="trainees-list">
+                        {% for trainee in trainees %}
+                        <div class="trainee-card">
+                            <div class="trainee-info">
+                                <h3>{{ trainee.name }}</h3>
+                                <p>{{ trainee.email }}</p>
+                            </div>
+                            <div class="trainee-actions">
+                                <a href="{{ url_for('coach.view_trainee', trainee_id=trainee.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-chart-line"></i> {% if lang == 'ar' %}عرض التقدم{% else %}View Progress{% endif %}
+                                </a>
+                                <a href="{{ url_for('coach.trainee_stats', trainee_id=trainee.id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-chart-bar"></i> {% if lang == 'ar' %}الإحصائيات{% else %}Statistics{% endif %}
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <p>{% if lang == 'ar' %}لا يوجد متدربين حالياً{% else %}No trainees yet{% endif %}</p>
+                        <a href="{{ url_for('coach.trainees') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> {% if lang == 'ar' %}إضافة متدربين{% else %}Add Trainees{% endif %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>{% if lang == 'ar' %}الأنشطة الأخيرة{% else %}Recent Activities{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent_activities %}
+                    <div class="activities-list">
+                        {% for activity in stats.recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>{{ activity.trainee_name }}</strong> - {{ activity.type }}</p>
+                                <small>{{ activity.date }}</small>
+                            </div>
+                            <div class="activity-actions">
+                                <a href="{{ url_for('coach.view_trainee', trainee_id=activity.trainee_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <p>{% if lang == 'ar' %}لا توجد أنشطة حديثة{% else %}No recent activities{% endif %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}مقارنة المتدربين{% else %}Compare Trainees{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="comparison-form">
+                    <div class="form-group">
+                        <label for="exercise-select">{% if lang == 'ar' %}اختر التمرين{% else %}Select Exercise{% endif %}:</label>
+                        <select id="exercise-select" onchange="updateComparisonChart()">
+                            {% for ex in exercises %}
+                            <option value="{{ ex }}">{{ ex }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div id="comparison-chart" class="comparison-chart"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}إدارة المتدربين{% else %}Manage Trainees{% endif %}</h2>
+                <div class="card-actions">
+                    <a href="{{ url_for('coach.trainees') }}" class="btn btn-primary">
+                        <i class="fas fa-users-cog"></i> {% if lang == 'ar' %}إدارة المتدربين{% else %}Manage Trainees{% endif %}
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>{% if lang == 'ar' %}يمكنك إضافة متدربين جدد أو إزالة متدربين حاليين من صفحة إدارة المتدربين.{% else %}You can add new trainees or remove current trainees from the trainees management page.{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }} | {% if lang == 'ar' %}الإصدار{% else %}Version{% endif %}: {{ app_version }}</p>
+    </footer>
+
+    <script>
+        // تهيئة رسم المقارنة
+        function updateComparisonChart() {
+            var exercise = document.getElementById("exercise-select").value;
+            
+            fetch(`{{ url_for('coach.get_comparison_data') }}?exercise=${exercise}`)
+                .then(response => response.json())
+                .then(data => {
+                    var chartObj = JSON.parse(data.chart_data);
+                    Plotly.newPlot('comparison-chart', chartObj.data, chartObj.layout);
+                });
+        }
+        
+        // تهيئة الرسم البياني عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById("exercise-select")) {
+                updateComparisonChart();
+            }
+        });
+    </script>
+</body>
+</html>

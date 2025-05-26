@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}الملف الشخصي - تتبع تمارين الشارع{% else %}Profile - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}الملف الشخصي{% else %}Profile{% endif %}</h1>
+                <p class="subtitle">{{ current_user.name }}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% if lang == 'ar' %}العودة للوحة التحكم{% else %}Back to Dashboard{% endif %}
+                </a>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تحديث الملف الشخصي{% else %}Update Profile{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('auth.profile') }}" method="POST">
+                    <div class="form-group">
+                        <label for="name">{% if lang == 'ar' %}الاسم{% else %}Name{% endif %}</label>
+                        <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">{% if lang == 'ar' %}البريد الإلكتروني{% else %}Email{% endif %}</label>
+                        <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user_type">{% if lang == 'ar' %}نوع الحساب{% else %}Account Type{% endif %}</label>
+                        <input type="text" id="user_type" value="{% if current_user.is_coach() %}{% if lang == 'ar' %}مدرب{% else %}Coach{% endif %}{% else %}{% if lang == 'ar' %}متدرب{% else %}Trainee{% endif %}{% endif %}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="created_at">{% if lang == 'ar' %}تاريخ الانضمام{% else %}Joined{% endif %}</label>
+                        <input type="text" id="created_at" value="{{ current_user.created_at }}" readonly>
+                    </div>
+                    
+                    <h3>{% if lang == 'ar' %}تغيير كلمة المرور{% else %}Change Password{% endif %}</h3>
+                    
+                    <div class="form-group">
+                        <label for="current_password">{% if lang == 'ar' %}كلمة المرور الحالية{% else %}Current Password{% endif %}</label>
+                        <input type="password" id="current_password" name="current_password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password">{% if lang == 'ar' %}كلمة المرور الجديدة{% else %}New Password{% endif %}</label>
+                        <input type="password" id="new_password" name="new_password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">{% if lang == 'ar' %}تأكيد كلمة المرور الجديدة{% else %}Confirm New Password{% endif %}</label>
+                        <input type="password" id="confirm_password" name="confirm_password">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if lang == 'ar' %}حفظ التغييرات{% else %}Save Changes{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }} | {% if lang == 'ar' %}الإصدار{% else %}Version{% endif %}: {{ app_version }}</p>
+    </footer>
+</body>
+</html>

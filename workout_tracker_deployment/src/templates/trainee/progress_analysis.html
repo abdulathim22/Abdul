@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}تحليل التقدم - تتبع تمارين الشارع{% else %}Progress Analysis - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}تحليل التقدم{% else %}Progress Analysis{% endif %}</h1>
+                <p class="subtitle">{% if lang == 'ar' %}مرحباً، {{ current_user.name }}{% else %}Welcome, {{ current_user.name }}{% endif %}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('trainee.dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% if lang == 'ar' %}العودة للوحة التحكم{% else %}Back to Dashboard{% endif %}
+                </a>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{% if lang == 'ar' %}إجمالي التمارين{% else %}Total Workouts{% endif %}</h3>
+                    <p class="stat-value">{{ stats.total_workouts }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{% if lang == 'ar' %}معدل التمارين{% else %}Workout Frequency{% endif %}</h3>
+                    <p class="stat-value">{{ stats.workout_frequency }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}التقييم العام{% else %}Overall Assessment{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="overall-progress">
+                    <p class="progress-status {{ 'positive' if 'تقدم' in progress_analysis.overall else 'neutral' }}">
+                        {{ progress_analysis.overall }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}أقوى التمارين{% else %}Strongest Exercises{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                {% if stats.strongest_exercises %}
+                <div class="exercise-strength-list">
+                    {% for ex in stats.strongest_exercises %}
+                    <div class="exercise-strength-item positive">
+                        <div class="exercise-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="exercise-details">
+                            <h3>{{ ex.name }}</h3>
+                            <p>{% if lang == 'ar' %}أعلى قيمة: {% else %}Highest value: {% endif %}{{ ex.value }}</p>
+                            <p>{% if lang == 'ar' %}بتاريخ: {% else %}Date: {% endif %}{{ ex.date }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <p>{% if lang == 'ar' %}لا توجد بيانات كافية{% else %}Not enough data{% endif %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}التمارين التي تحتاج تحسين{% else %}Exercises Needing Improvement{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                {% if stats.weakest_exercises %}
+                <div class="exercise-strength-list">
+                    {% for ex in stats.weakest_exercises %}
+                    <div class="exercise-strength-item neutral">
+                        <div class="exercise-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="exercise-details">
+                            <h3>{{ ex.name }}</h3>
+                            <p>{% if lang == 'ar' %}أدنى قيمة: {% else %}Lowest value: {% endif %}{{ ex.value }}</p>
+                            <p>{% if lang == 'ar' %}بتاريخ: {% else %}Date: {% endif %}{{ ex.date }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <p>{% if lang == 'ar' %}لا توجد بيانات كافية{% else %}Not enough data{% endif %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}التحسينات الأخيرة{% else %}Recent Improvements{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                {% if stats.recent_improvements %}
+                <div class="improvements-list">
+                    {% for improvement in stats.recent_improvements %}
+                    <div class="improvement-item">
+                        <div class="improvement-icon">
+                            <i class="fas fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="improvement-details">
+                            <h3>{{ improvement.name }}</h3>
+                            <p>{% if lang == 'ar' %}تحسن بنسبة {% else %}Improved by {% endif %}{{ "%.1f"|format(improvement.improvement) }}%</p>
+                            <p>{% if lang == 'ar' %}من {% else %}From {% endif %}{{ improvement.from_value }} {% if lang == 'ar' %}إلى{% else %}to{% endif %} {{ improvement.to_value }}</p>
+                            <p>{% if lang == 'ar' %}بتاريخ: {% else %}Date: {% endif %}{{ improvement.date }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <p>{% if lang == 'ar' %}لا توجد بيانات كافية{% else %}Not enough data{% endif %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تحليل التمارين{% else %}Exercise Analysis{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="exercise-progress">
+                    <div class="exercise-progress-list">
+                        {% for ex, analysis in progress_analysis.exercises.items() %}
+                        <div class="exercise-progress-item {{ 'positive' if 'تحسن' in analysis else 'neutral' }}">
+                            <h4>{{ ex }}</h4>
+                            <p>{{ analysis }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}نصائح للتحسين{% else %}Improvement Tips{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}الانتظام{% else %}Consistency{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}حافظ على جدول تمارين منتظم، 3-4 مرات في الأسبوع للحصول على أفضل النتائج.{% else %}Maintain a regular workout schedule, 3-4 times per week for best results.{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}التوازن{% else %}Balance{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}ركز على تحسين التمارين الضعيفة مع الاستمرار في تطوير التمارين القوية.{% else %}Focus on improving weaker exercises while continuing to develop stronger ones.{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h3>{% if lang == 'ar' %}التدرج{% else %}Progression{% endif %}</h3>
+                            <p>{% if lang == 'ar' %}زيادة الصعوبة تدريجياً عن طريق إضافة تكرارات أو أوزان أو مقاومة أكبر.{% else %}Gradually increase difficulty by adding more repetitions, weight, or resistance.{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }} | {% if lang == 'ar' %}الإصدار{% else %}Version{% endif %}: {{ app_version }}</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,902 @@
+/* تعريف الخطوط والألوان الأساسية */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --text-color: #333;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* إعادة تعيين الأنماط الافتراضية */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+body[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+body[dir="ltr"] {
+    direction: ltr;
+    text-align: left;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* تنسيق الرأس */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* تنسيق البطاقات */
+.card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 15px 20px;
+    background-color: var(--dark-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* تنسيق لوحة المعلومات */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* تنسيق النماذج */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* تنسيق الأزرار */
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #27ae60;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.btn-edit {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-delete {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+.btn-share {
+    background-color: #9b59b6;
+    color: white;
+}
+
+.btn-share:hover {
+    background-color: #8e44ad;
+}
+
+/* تنسيق الجداول */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.workout-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.workout-table th,
+.workout-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.workout-table th {
+    background-color: var(--dark-color);
+    color: white;
+    font-weight: 600;
+}
+
+.workout-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.workout-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.inline-form {
+    display: inline;
+}
+
+/* تنسيق الرسم البياني */
+.chart-card {
+    grid-column: 1 / -1;
+}
+
+.progress-chart {
+    width: 100%;
+    height: 500px;
+}
+
+.comparison-chart {
+    width: 100%;
+    height: 400px;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.chart-type-selector,
+.time-range-selector {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* تنسيق النافذة المنبثقة */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    width: 80%;
+    max-width: 600px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background-color: var(--dark-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #bbb;
+}
+
+/* تنسيق التذييل */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    color: #777;
+    border-top: 1px solid #eee;
+}
+
+/* تنسيق صفحات المصادقة */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 500px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.auth-header {
+    padding: 30px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    text-align: center;
+}
+
+.auth-body {
+    padding: 30px 20px;
+}
+
+.auth-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.auth-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.checkbox-group input {
+    width: auto;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+}
+
+.language-switcher {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.language-switcher a {
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 5px;
+}
+
+.language-switcher a.active {
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+/* تنسيق الإشعارات */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    color: white;
+}
+
+.alert-success {
+    background-color: var(--secondary-color);
+}
+
+.alert-error {
+    background-color: var(--accent-color);
+}
+
+.alert-info {
+    background-color: var(--primary-color);
+}
+
+/* تنسيق القائمة المنسدلة */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    z-index: 1;
+}
+
+body[dir="ltr"] .dropdown-menu {
+    right: auto;
+    left: 0;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.dropdown-menu a:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* تنسيق بطاقات الإحصائيات */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: 50%;
+}
+
+.stat-content h3 {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+/* تنسيق قائمة المتدربين */
+.trainees-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.trainee-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    transition: var(--transition);
+}
+
+.trainee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.trainee-info h3 {
+    margin-bottom: 5px;
+    color: var(--dark-color);
+}
+
+.trainee-info p {
+    color: #777;
+    margin-bottom: 15px;
+}
+
+.trainee-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* تنسيق قائمة الأنشطة */
+.activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    background-color: #f1f1f1;
+}
+
+.activity-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: 50%;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content p {
+    margin-bottom: 5px;
+}
+
+.activity-content small {
+    color: #777;
+}
+
+/* تنسيق قائمة الإشعارات */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.notification-item:hover {
+    background-color: #f1f1f1;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content p {
+    margin-bottom: 5px;
+}
+
+.notification-content small {
+    color: #777;
+}
+
+/* تنسيق مجموعة التمارين */
+.exercise-group {
+    margin-bottom: 25px;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    padding: 15px;
+}
+
+.exercise-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exercise-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+}
+
+/* تنسيق شارات الوزن والمقاومة */
+.weight-badge {
+    display: inline-block;
+    padding: 2px 5px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.resistance-badge {
+    display: inline-block;
+    padding: 2px 5px;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.resistance-badge.light {
+    background-color: #27ae60;
+}
+
+.resistance-badge.medium {
+    background-color: #f39c12;
+}
+
+.resistance-badge.heavy {
+    background-color: #e74c3c;
+}
+
+/* تنسيق تحليل التقدم */
+.progress-analysis {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.overall-progress {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: var(--border-radius);
+}
+
+.progress-status {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.progress-status.positive {
+    color: var(--secondary-color);
+}
+
+.progress-status.neutral {
+    color: #f39c12;
+}
+
+.progress-status.negative {
+    color: var(--accent-color);
+}
+
+.exercise-progress-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.exercise-progress-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: var(--border-radius);
+}
+
+.exercise-progress-item h4 {
+    margin-bottom: 5px;
+    color: var(--dark-color);
+}
+
+.exercise-progress-item.positive {
+    border-left: 4px solid var(--secondary-color);
+}
+
+.exercise-progress-item.neutral {
+    border-left: 4px solid #f39c12;
+}
+
+.exercise-progress-item.negative {
+    border-left: 4px solid var(--accent-color);
+}
+
+/* تنسيق نظرة عامة على المتدرب */
+.trainee-overview {
+    margin-bottom: 30px;
+}
+
+.trainee-info-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.trainee-avatar {
+    font-size: 3rem;
+    color: var(--primary-color);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: 50%;
+}
+
+.trainee-details {
+    flex: 1;
+}
+
+.trainee-details h2 {
+    margin-bottom: 5px;
+    color: var(--dark-color);
+}
+
+.trainee-details p {
+    color: #777;
+    margin-bottom: 5px;
+}
+
+/* تنسيق مربع البحث */
+.search-box {
+    position: relative;
+    width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 35px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.search-box i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #777;
+}
+
+body[dir="rtl"] .search-box i {
+    left: auto;
+    right: 10px;
+}
+
+/* تنسيق حالة فارغة */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-actions {
+        margin-top: 15px;
+    }
+    
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .card-actions {
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    .trainee-info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .chart-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .exercise-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .exercise-progress-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .trainees-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-overview {
+        grid-template-columns: 1fr;
+    }
+}

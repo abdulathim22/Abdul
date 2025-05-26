@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if lang == 'ar' %}تمرين مشترك - تتبع تمارين الشارع{% else %}Shared Workout - Street Workout Tracker{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta property="og:title" content="{% if lang == 'ar' %}تمرين مشترك من {{ user.name }}{% else %}Shared Workout from {{ user.name }}{% endif %}">
+    <meta property="og:description" content="{% if lang == 'ar' %}شاهد تمرين {{ user.name }} بتاريخ {{ workout.date }}{% else %}Check out {{ user.name }}'s workout on {{ workout.date }}{% endif %}">
+    <meta property="og:type" content="website">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>{% if lang == 'ar' %}تمرين مشترك{% else %}Shared Workout{% endif %}</h1>
+                <p class="subtitle">{{ user.name }} - {{ workout.date }}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> {% if lang == 'ar' %}الصفحة الرئيسية{% else %}Home{% endif %}
+                </a>
+                <div class="language-switcher">
+                    <a href="{{ url_for('auth.set_language', lang='ar') }}" class="{{ 'active' if lang == 'ar' else '' }}">العربية</a> |
+                    <a href="{{ url_for('auth.set_language', lang='en') }}" class="{{ 'active' if lang == 'en' else '' }}">English</a>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}تفاصيل التمرين{% else %}Workout Details{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="shared-workout-details">
+                    <div class="workout-meta">
+                        <p><strong>{% if lang == 'ar' %}المتدرب{% else %}Trainee{% endif %}:</strong> {{ user.name }}</p>
+                        <p><strong>{% if lang == 'ar' %}التاريخ{% else %}Date{% endif %}:</strong> {{ workout.date }}</p>
+                    </div>
+                    
+                    <div class="workout-exercises">
+                        <h3>{% if lang == 'ar' %}التمارين{% else %}Exercises{% endif %}</h3>
+                        <div class="table-responsive">
+                            <table class="workout-table">
+                                <thead>
+                                    <tr>
+                                        <th>{% if lang == 'ar' %}التمرين{% else %}Exercise{% endif %}</th>
+                                        <th>{% if lang == 'ar' %}القيمة{% else %}Value{% endif %}</th>
+                                        <th>{% if lang == 'ar' %}التفاصيل{% else %}Details{% endif %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ex in exercises %}
+                                    {% if workout[ex] is defined and workout[ex] is not none %}
+                                    <tr>
+                                        <td>{{ ex }}</td>
+                                        <td>{{ workout[ex]|int }}</td>
+                                        <td>
+                                            {% if workout[ex ~ '_weight'] is defined and workout[ex ~ '_weight'] > 0 %}
+                                                <span class="weight-badge">{{ workout[ex ~ '_weight'] }} {% if lang == 'ar' %}كجم{% else %}kg{% endif %}</span>
+                                            {% endif %}
+                                            
+                                            {% if workout[ex ~ '_resistance'] is defined and workout[ex ~ '_resistance'] %}
+                                                <span class="resistance-badge {{ workout[ex ~ '_resistance'] }}">
+                                                    {% if workout[ex ~ '_resistance'] == 'light' %}
+                                                        {% if lang == 'ar' %}خفيفة{% else %}Light{% endif %}
+                                                    {% elif workout[ex ~ '_resistance'] == 'medium' %}
+                                                        {% if lang == 'ar' %}متوسطة{% else %}Medium{% endif %}
+                                                    {% elif workout[ex ~ '_resistance'] == 'heavy' %}
+                                                        {% if lang == 'ar' %}ثقيلة{% else %}Heavy{% endif %}
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                            
+                                            {% if workout[ex ~ '_notes'] is defined and workout[ex ~ '_notes'] %}
+                                                <div class="notes">
+                                                    <small>{{ workout[ex ~ '_notes'] }}</small>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>{% if lang == 'ar' %}انضم إلينا{% else %}Join Us{% endif %}</h2>
+            </div>
+            <div class="card-body">
+                <div class="join-cta">
+                    <p>{% if lang == 'ar' %}هل تريد تتبع تمارينك وتحسين أدائك؟ انضم إلى تطبيق تتبع تمارين الشارع اليوم!{% else %}Want to track your workouts and improve your performance? Join Street Workout Tracker today!{% endif %}</p>
+                    <div class="cta-buttons">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> {% if lang == 'ar' %}إنشاء حساب{% else %}Register{% endif %}
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i> {% if lang == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>{% if lang == 'ar' %}تطبيق تتبع تمارين الشارع{% else %}Street Workout Tracker{% endif %} &copy; {{ current_year }}</p>
+    </footer>
+</body>
+</html>
